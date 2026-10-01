@@ -77,7 +77,7 @@ class Level:
         vshloc = []
         i = 0
         #Place spike locations for stage 1 here
-        hshloc.append((tx, ty, 4))  #5 LONG PIXEL TEST        
+        hshloc.append((tx, ty, 3))  #5 LONG PIXEL TEST        
 
         while i < len(hshloc):                                    
             j = 0
@@ -98,7 +98,7 @@ class Level:
         vshloc = []
         i = 0
         #Place spike locations for stage 1 here
-        hshloc.append((0, 0, 100))        
+        hshloc.append((tx+8, ty, 3))        
 
         while i < len(hshloc):                                    
             j = 0
@@ -123,7 +123,7 @@ global dead_pixel_list
 dead_pixel_list = Level.deadPixel(tx, ty)
 
 player = Player()
-
+print("ONE LOOP DONE")
 running, colGen = True, True
 while running:
     numNeighbors = 0
@@ -132,27 +132,38 @@ while running:
     for pixel in pixel_list:                                          #for every alive pixel:
         pixelBigRect = pixel.rect.inflate(4,4)                            #create a big pixel with a larger collision
         pixels = pixel_list.sprites()                                     #Turn all pixels into a sprite list
-        for colPixel in pixels:                                              #compare each pixel with a particular pixel
-            if pygame.sprite.collide_mask(pixelBigRect, colPixel):           #If they collide:
-                numNeighbors += 1                                            #neighbors is increased by one
+        neighbors = pygame.sprite.spritecollide(pixel, pixels, False)
+        print("Comparing Alive")
+        for neighbor in neighbors:
+            numNeighbors += 1
         if numNeighbors < 2:
             pixel_list.remove(pixel)
-            dead_pixel_ships.add(pixel)
+            dead_pixel_list.add(pixel)
+            print("Pixel Died-Underpopulation")
         elif numNeighbors > 3:
             pixel_list.remove(pixel)
-            dead_pixel_ships.add(pixel)
+            dead_pixel_list.add(pixel)
+            print("Pixel Died-Overpopulation")
+
+    numNeighbors = 0
 #I'm going to  have to shange mask to spritecollide as its more memory-efficient + doesnt cause random crashes
+            
     for deadPixel in dead_pixel_list:
         deadPixelBigRect = pixel.rect.inflate(4,4)
-        pixels = pixel_list.sprites()
-        for colPixel in pixels:
-            if pygame.sprite.collide_mask(deadPixelBigRect, colPixel): #this is somehow breaking python
-                numNeighbors += 1
+        deadPixels = dead_pixel_list.sprites()
+        neighbors = pygame.sprite.spritecollide(deadPixel, pixel_list, False)
+        print("Comparing Dead")
+        for neighbor in neighbors:
+            numNeighbors += 1
         if numNeighbors == 3:
-            #reuse deadShipAliveShip code
             dead_pixel_list.remove(deadPixel)
-            pixel_ships.add(deadPixel) 
+            pixel_list.add(deadPixel)
+            print("Pixel Born")
+            
+#I HAVE THE ANSWER! Only update pixels AFTER comparison-store the changes in a list until then
 
+    #
+            
     clock.tick(60)  #later replace with only progressing when key pressed
     player.update()
     pixel_list.draw(screen)
