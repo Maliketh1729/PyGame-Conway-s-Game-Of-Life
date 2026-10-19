@@ -88,6 +88,7 @@ class Level:
                 j = j + 1                 
             i = i + 1
         i = 0
+
         return pixel_list
     def clearList():
         pixel_list = []
@@ -113,11 +114,14 @@ class Level:
                 j = j + 1                 
             i = i + 1
         i = 0
+        print("RUN")
         return dead_pixel_list
+    
     def clearList():
         pixel_list = []
         dead_pixel_list = []
         empty_list = []
+
 
 #I feel like the best approach is to have every single possible pixel location to be  a 'dead pixel' and then change it to a live pixel if it meets conditions
         
@@ -134,6 +138,12 @@ running, colGen = True, True
 queuedDeaths,queuedBirths = [],[]
 
 while running:
+    
+    clock.tick(1)  #later replace with only progressing when key pressed
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
     numNeighbors = 0
 #make collision detection based on if the 'large' hitbox of the pix overlaps the 'small' pixel
 
@@ -166,6 +176,10 @@ while running:
         #neighbors arent being detected?
         #as pixel list seems to be empty
         #the function to define pixel_list doesnt seem to be being called
+        #pix are still being added to pixel_list
+        #and just before being returned pixel_list has the requisite sprites instide
+
+        #found answer-live group being created but then they are dying.However, thisis not represented on-screen
         
         print("Comparing Dead")
         for neighbor in neighbors:
@@ -176,7 +190,8 @@ while running:
 
             print("Pixel Born")
         
-      #found problem-when pixels die they are being wiped before before having the chance to update  
+      #found problem-when pixels die they are being wiped before before having the chance to update
+      #Fixed pixels not being assigned properly-now need to make these changes visible
 
     for i in range(0,len(queuedDeaths)):
         print("Death Executed")
@@ -185,10 +200,11 @@ while running:
     for i in range(0,len(queuedBirths)):
         dead_pixel_list.remove(queuedBirths[i])
         pixel_list.add(queuedBirths[i])
-
+    print("Live pixels:", pixel_list)
+    print("Dead pixels:", dead_pixel_list)
     queuedDeaths,queuedBirths = [],[]
     
-    clock.tick(1)  #later replace with only progressing when key pressed
+
     player.update()
     pixel_list.draw(screen)
     dead_pixel_list.draw(screen)
